@@ -1,0 +1,31 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto8
+    commands:
+      - echo Installing dependencies...
+      - mvn install -DskipTests
+  pre_build:
+    commands:
+      - echo Preparing build environment...
+      - echo Setting up CodeArtifact login...
+      - export CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain <your-domain> --domain-owner <your-account-id> --query authorizationToken --output text)
+      - echo $CODEARTIFACT_AUTH_TOKEN
+  build:
+    commands:
+      - echo Building the project...
+      - mvn clean package
+  post_build:
+    commands:
+      - echo Build completed.
+      - echo Deploying the application...
+
+artifacts:
+  files:
+    - target/*.jar
+
+cache:
+  paths:
+    - '/root/.m2/**/*'
